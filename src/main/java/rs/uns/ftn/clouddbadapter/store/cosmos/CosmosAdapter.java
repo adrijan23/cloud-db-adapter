@@ -60,14 +60,12 @@ public final class CosmosAdapter extends BaseAdapter {
 
     @Override
     protected void doCreate(String collection, String id, Map<String, Object> data) {
-        data.put("id", id); // ensure id matches PK
+        Map<String, Object> payload = new java.util.HashMap<>(data); // copy
+        payload.put("id", id); // ensure PK is present
         try {
-            CosmosItemResponse<Object> resp = container(collection)
-                    .createItem(data, new PartitionKey(id), new CosmosItemRequestOptions());
+            container(collection).createItem(payload, new PartitionKey(id), new CosmosItemRequestOptions());
         } catch (CosmosException e) {
-            if (e.getStatusCode() == 409) { // Conflict = already exists
-                throw new AlreadyExists("Document exists: " + id);
-            }
+            if (e.getStatusCode() == 409) throw new AlreadyExists("Document exists: " + id);
             throw new StoreException("Cosmos create failed", e);
         }
     }
@@ -88,10 +86,10 @@ public final class CosmosAdapter extends BaseAdapter {
 
     @Override
     protected void doUpdate(String collection, String id, Map<String, Object> data) {
-        data.put("id", id);
+        Map<String, Object> payload = new java.util.HashMap<>(data); // copy
+        payload.put("id", id);
         try {
-            container(collection)
-                    .upsertItem(data, new PartitionKey(id), new CosmosItemRequestOptions());
+            container(collection).upsertItem(payload, new PartitionKey(id), new CosmosItemRequestOptions());
         } catch (CosmosException e) {
             throw new StoreException("Cosmos update failed", e);
         }

@@ -2,7 +2,9 @@ package rs.uns.ftn.clouddbadapter.store.dynamo;
 
 import rs.uns.ftn.clouddbadapter.store.BaseAdapter;
 
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
@@ -25,13 +27,18 @@ public final class DynamoDbAdapter extends BaseAdapter {
      * var AWS_DYNAMO_ENDPOINT is set (e.g. http://localhost:8000), uses it.
      */
     public static DynamoDbClient defaultClient() {
-        String endpoint = System.getenv("AWS_DYNAMO_ENDPOINT");
+//        String endpoint = System.getenv("AWS_DYNAMO_ENDPOINT");
+        String accessKey = System.getenv().getOrDefault("AWS_ACCESS_KEY_ID", "dummy");
+        String secretKey = System.getenv().getOrDefault("AWS_SECRET_ACCESS_KEY", "dummy");
+
         DynamoDbClientBuilder b = DynamoDbClient.builder()
-                .credentialsProvider(DefaultCredentialsProvider.create())
+                .credentialsProvider(
+                        StaticCredentialsProvider.create(
+                                AwsBasicCredentials.create(accessKey, secretKey)))
                 .region(Region.of(System.getenv().getOrDefault("AWS_REGION", "us-east-1")));
-        if (endpoint != null && !endpoint.isBlank()) {
-            b = b.endpointOverride(URI.create(endpoint));
-        }
+//        if (endpoint != null && !endpoint.isBlank()) {
+//            b = b.endpointOverride(URI.create(endpoint));
+//        }
         return b.build();
     }
 
