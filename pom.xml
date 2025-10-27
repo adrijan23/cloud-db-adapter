@@ -27,5 +27,11 @@
             <artifactId>google-cloud-firestore</artifactId>
             <version>3.21.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-cosmos</artifactId>
+            <version>4.61.0</version>
+        </dependency>
     </dependencies>
 </project>
