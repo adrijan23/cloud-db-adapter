@@ -11,6 +11,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -110,4 +112,19 @@ public final class DynamoDbAdapter extends BaseAdapter {
             throw new StoreException("Dynamo delete failed", e);
         }
     }
+
+    @Override
+    public List<Map<String, Object>> list(String table, int limit) {
+        List<Map<String,Object>> result = new ArrayList<>();
+        ScanRequest req = ScanRequest.builder()
+                .tableName(table)
+                .limit(limit)
+                .build();
+        ScanResponse res = ddb.scan(req);
+        for (Map<String, AttributeValue> item : res.items()) {
+            result.add(DynamoMapper.fromAttributes(item));
+        }
+        return result;
+    }
+
 }

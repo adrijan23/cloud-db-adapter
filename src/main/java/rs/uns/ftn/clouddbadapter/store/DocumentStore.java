@@ -18,7 +18,5 @@ public interface DocumentStore {
 
     void deleteById(String collection, String id);
 
-    default List<Map<String, Object>> list(String collection, int limit) {
-        return List.of();
-    }
+    List<Map<String, Object>> list(String collection, int limit);
 }

@@ -1,5 +1,9 @@
 package rs.uns.ftn.clouddbadapter.store.cosmos;
 
+import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.util.CosmosPagedIterable;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import rs.uns.ftn.clouddbadapter.store.BaseAdapter;
 
 import com.azure.cosmos.*;
@@ -8,6 +12,8 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.implementation.NotFoundException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -104,4 +110,18 @@ public final class CosmosAdapter extends BaseAdapter {
             throw new StoreException("Cosmos delete failed", e);
         }
     }
+
+    @Override
+    public List<Map<String, Object>> list(String collection, int limit) {
+        List<Map<String,Object>> out = new ArrayList<>();
+        CosmosContainer c = client.getDatabase(databaseName).getContainer(collection);
+        CosmosPagedIterable<ObjectNode> res = c.queryItems("SELECT * FROM c", new CosmosQueryRequestOptions(), ObjectNode.class);
+        for (ObjectNode n : res) {
+            Map<String,Object> map = new ObjectMapper().convertValue(n, Map.class);
+            out.add(map);
+            if (out.size() >= limit) break;
+        }
+        return out;
+    }
+
 }
