@@ -3,8 +3,8 @@ package rs.uns.ftn.clouddbadapter.store.firestore;
 import rs.uns.ftn.clouddbadapter.store.BaseAdapter;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 
 /**
  * Core Firestore adapter.
@@ -70,4 +70,21 @@ public final class FirestoreAdapter extends BaseAdapter {
             throw new StoreException("Firestore delete failed", e);
         }
     }
+
+    @Override
+    public List<Map<String, Object>> list(String collection, int limit) {
+        try {
+            var docs = db.collection(collection).limit(limit).get().get().getDocuments();
+            List<Map<String,Object>> out = new ArrayList<>();
+            for (var d : docs) {
+                Map<String,Object> m = new HashMap<>(d.getData());
+                m.put("id", d.getId());
+                out.add(m);
+            }
+            return out;
+        } catch (Exception e) {
+            throw new StoreException("Firestore list failed", e);
+        }
+    }
+
 }
